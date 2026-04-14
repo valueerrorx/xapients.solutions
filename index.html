@@ -95,7 +95,13 @@
     width: 100vw;
     height: 100vh;
     pointer-events: none;
-    z-index: 9000;
+    z-index: 0;
+  }
+
+  /* Sits above #phaser-overlay so cards, contact, privacy stay clickable and readable */
+  .page-stack {
+    position: relative;
+    z-index: 1;
   }
 
   #phaser-overlay canvas {
@@ -768,6 +774,7 @@
   </ul>
 </nav>
 
+<div class="page-stack">
 <!-- ─── Hero ────────────────────────────────────────────── -->
 <div id="hero">
   <div class="hero-content">
@@ -1103,8 +1110,9 @@
     <a href="#privacy">Privacy</a>
   </span>
 </footer>
+</div>
 
-<!-- ─── Phaser Physics Overlay (transparent, on top) ────── -->
+<!-- ─── Phaser Physics Overlay (transparent, behind page content) ────── -->
 <div id="phaser-overlay"></div>
 
 <script>
