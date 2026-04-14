@@ -480,7 +480,7 @@
   }
 
   .about-copy {
-    max-width: 720px;
+    max-width: 800px;
     margin-bottom: 2.5rem;
   }
 
@@ -905,14 +905,14 @@
       </div>
     </a>
 
-    <!-- geogebra-standalone -->
-    <a class="project-card card-orange fadeup" href="https://github.com/valueerrorx/geogebra-standalone" target="_blank" rel="noopener">
+    <!-- geogebra-linux -->
+    <a class="project-card card-orange fadeup" href="https://github.com/valueerrorx/geogebra-linux" target="_blank" rel="noopener">
       <div class="card-screenshot">
         <img src="./assets/geozebra.png" alt="GeoGebra Screenshot" loading="lazy">
       </div>
       <div class="card-body">
         <div class="card-icon">📐</div>
-        <div class="card-title">GeoGebra Standalone</div>
+        <div class="card-title">GeoGebra Linux</div>
         <div class="card-desc">GeoGebra natively on Linux — packaged as AppImage and Debian package. Fully functional offline, no browser required. Great for classrooms with restricted internet access.</div>
         <div class="card-tags">
           <span class="tag">Electron</span>
@@ -991,10 +991,13 @@
   <p class="section-label">Background</p>
   <h2 class="section-title">About</h2>
   <div class="about-copy">
-    <p class="section-lead">I'm a CS teacher based in Austria. I build open-source education technology, automation tooling, and Linux desktop apps.</p>
+    <p class="section-lead">I'm a CS teacher based in Austria. <br>I build open-source education technology, automation tooling, and Linux desktop apps.</p>
     <p class="about-kicker">If I'm not teaching, I'm probably automating something that didn't strictly need it.</p>
     <p class="about-text">I'm a father of three. I wingfoil, snowboard, and I'll try just about any other sport that involves a board. I practice yoga, and I play guitar or piano when I need to clear my head.</p>
-    <p class="about-text">I'm convinced knowledge and software <strong>have to be free</strong>. I work from the idea that <strong>nothing is impossible</strong> — in the classroom and in code. <strong>Open Source First</strong> is how I put that into practice: everything I publish is free, and it will stay that way.</p>
+    <p class="about-text">I'm convinced knowledge and software have to be free and that your data has to be protected. <br>
+    I also work from the idea that <strong>nothing is impossible</strong> — in the classroom and in code. </p>
+    <p class="about-text"><strong>Open Source First</strong> is how I put that into practice: 
+      everything I publish is free, and it will stay that way.</p>
   </div>
 
   <div class="skills-grid">
@@ -1141,7 +1144,10 @@ class Level {
     MatterEvents    = Phaser.Physics.Matter.Matter.Events;
     matterEngine    = this.matter.world.engine;
 
-    for (let i = 0; i < number; i++) { pumpIt(this, true); }
+    // Spawn 2 guaranteed large floaters first, then the rest normal
+    pumpIt(this, true, true);
+    pumpIt(this, true, true);
+    for (let i = 0; i < number - 2; i++) { pumpIt(this, true, false); }
     setupDrag(this);
   }
 
@@ -1151,7 +1157,7 @@ class Level {
     }
     graphics.clear();
     firebirds.forEach(iota => { checkDistance(iota, firebirds, this); });
-    this.matter.world.setGravity(0, gravity ? 1 : 0);
+    this.matter.world.setGravity(0, gravity ? 0.3 : 0);
   }
 }
 
@@ -1225,35 +1231,49 @@ function setupDrag(scene) {
 }
 
 function checkDistance(myself, iotas, scene) {
-  iotas.forEach(iota => {
+  const myIndex = iotas.indexOf(myself);
+  iotas.forEach((iota, index) => {
+    if (iota === myself) return;
     let dx = iota.x - myself.x;
     let dy = iota.y - myself.y;
     let dist = Math.sqrt(dx * dx + dy * dy);
     if (dist === 0) return;
-    let alpha = dist < 50 ? 0.02 : 3 / dist;
-    graphics.lineStyle(60 / dist, 0x4f8ef7, alpha);
 
-    if (dist < 250) {
-      let springexists = false;
-      myself.springs.forEach(spring => {
-        if (spring.bodyA == iota.body || spring.bodyB == iota.body) { springexists = true; }
-      });
-      if (!springexists) {
-        let spring = Phaser.Physics.Matter.Matter.Constraint.create({
-          bodyA: iota.body,
-          bodyB: myself.body,
-          length: 25,
-          stiffness: 0.00002,
+    const combinedMass = myself.body.mass + iota.body.mass;
+    const massNorm = Math.min(combinedMass / 20, 1);
+    const attractRadius = 180 + massNorm * 200;
+
+    if (dist < attractRadius) {
+      // Springs: only the lower-index object creates them — avoids duplicates
+      if (index > myIndex) {
+        let springexists = false;
+        myself.springs.forEach(spring => {
+          if (spring.bodyA == iota.body || spring.bodyB == iota.body) { springexists = true; }
         });
-        scene.matter.world.add(spring);
-        myself.springs.push(spring);
+        if (!springexists) {
+          const stiffness = 0.000008 + massNorm * 0.00012;
+          let spring = Phaser.Physics.Matter.Matter.Constraint.create({
+            bodyA: iota.body,
+            bodyB: myself.body,
+            length: 20 + massNorm * 30,
+            stiffness: stiffness,
+          });
+          scene.matter.world.add(spring);
+          myself.springs.push(spring);
+        }
+
+        // Draw line once per pair — no more flicker from double-drawing
+        let alpha = dist < 50 ? 0.02 : (3 + massNorm * 5) / dist;
+        let lineWidth = (50 + massNorm * 80) / dist;
+        graphics.lineStyle(lineWidth, 0x4f8ef7, alpha);
+        graphics.beginPath();
+        graphics.moveTo(myself.x, myself.y);
+        graphics.lineTo(iota.x, iota.y);
+        graphics.closePath();
+        graphics.strokePath();
       }
-      graphics.beginPath();
-      graphics.moveTo(myself.x, myself.y);
-      graphics.lineTo(iota.x, iota.y);
-      graphics.closePath();
-      graphics.strokePath();
     } else {
+      // Spring removal: both sides need to clean up
       myself.springs.forEach(spring => {
         if (spring.bodyA == iota.body || spring.bodyB == iota.body) {
           scene.matter.world.remove(spring);
@@ -1264,9 +1284,8 @@ function checkDistance(myself, iotas, scene) {
   });
 }
 
-function pumpIt(scene, init) {
-  // ~2% chance of a large floater, otherwise normal size
-  const isLarge = Math.random() < 0.02;
+function pumpIt(scene, init, forceLarge = false) {
+  const isLarge = forceLarge;
   let random = isLarge
     ? Phaser.Math.FloatBetween(0.55, 0.75)
     : Phaser.Math.FloatBetween(0.1, 0.4);
