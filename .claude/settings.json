@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /home/valueerror/STUFF/DEV/xapients.solutions/assets/*.png)",
+      "Bash(mkdir -p /home/valueerror/STUFF/DEV/xapients.solutions/lib/fonts)",
+      "Bash(unzip -q inter.zip \"InterVariable.ttf\" \"InterVariable-Italic.ttf\")",
+      "Bash(unzip -q inter.zip \"*Variable*\")",
+      "Bash(unzip -q jbmono.zip \"fonts/ttf/JetBrainsMono-Regular.ttf\" \"fonts/ttf/JetBrainsMono-Medium.ttf\")",
+      "Bash(ls /home/valueerror/STUFF/DEV/xapients.solutions/assets/geo*)",
+      "WebFetch(domain:life-edu.eu)",
+      "Bash(ls /home/valueerror/STUFF/DEV/xapients.solutions/assets/life*)",
+      "Bash(ls /home/valueerror/STUFF/DEV/xapients.solutions/assets/ring*)"
+    ]
+  }
+}

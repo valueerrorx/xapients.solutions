@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>xapient.solutions — Mag. Thomas Weissel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Portfolio of Mag. Thomas Weissel — CS teacher (Austria), open-source education technology, Linux desktop apps, and automation tooling">
+<meta name="author" content="ValueError / Mag. Thomas Weissel">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/png" href="favicon.ico">
+<style>
+  @font-face {
+    font-family: 'Inter';
+    src: url('lib/fonts/InterVariable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Inter';
+    src: url('lib/fonts/InterVariable-Italic.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('lib/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('lib/fonts/JetBrainsMono-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<script src="lib/phaser.min.js"></script>
+<style>
+  :root {
+    --bg: #07080f;
+    --bg2: #0d0f1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.15);
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --accent3: #06b6d4;
+    --green: #10b981;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    background-color: var(--bg);
+    background-image: url('./assets/worldmap.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+
+
+  /* ─── Phaser Canvas Overlay ────────────────────────────── */
+  #phaser-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  #phaser-overlay canvas {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: auto;
+  }
+
+  /* ─── Hero ─────────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    padding: 2rem;
+    background: radial-gradient(ellipse 80% 60% at 50% 50%,
+      rgba(79,142,247,0.05) 0%,
+      transparent 70%);
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+  }
+
+  .hero-name {
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 30%, rgba(79,142,247,0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--text-dim);
+    font-weight: 300;
+    max-width: 560px;
+    margin: 0 auto 3rem;
+    line-height: 1.7;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.3;
+    animation: pulse-fade 2.5s ease-in-out infinite;
+  }
+
+  .hero-scroll span {
+    font-size: 0.7rem;
+    font-family: var(--mono);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .hero-scroll svg {
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  @keyframes pulse-fade {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ─── Nav ───────────────────────────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 8000;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    background: rgba(7, 8, 15, 0.7);
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color var(--transition);
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* ─── Section ───────────────────────────────────────────── */
+  section {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 7rem 2rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 80px;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .section-lead {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin-bottom: 4rem;
+    line-height: 1.7;
+  }
+
+  /* ─── Projects Grid ─────────────────────────────────────── */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  .project-card {
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: border-color var(--transition), transform var(--transition), background var(--transition);
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    min-height: 180px;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top left, var(--card-accent, rgba(79,142,247,0.05)) 0%, transparent 60%);
+    pointer-events: none;
+    border-radius: var(--radius-lg);
+    transition: opacity var(--transition);
+    opacity: 0;
+  }
+
+  .project-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-3px);
+    background: rgba(26, 34, 53, 0.7);
+  }
+
+  .project-card:hover::before { opacity: 1; }
+
+  /* Screenshot panel on the left */
+  .card-screenshot {
+    position: relative;
+    overflow: hidden;
+    background: rgba(0,0,0,0.3);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    flex-shrink: 0;
+  }
+
+  .card-screenshot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+    display: block;
+    opacity: 0.85;
+    filter: grayscale(0.3) brightness(0.8);
+    transition: opacity var(--transition), filter var(--transition);
+  }
+
+  /* Gradient vignette fading into card background on the right edge */
+  .card-screenshot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent 50%, var(--surface) 100%);
+    pointer-events: none;
+    transition: background var(--transition);
+  }
+
+  .project-card:hover .card-screenshot::after {
+    background: linear-gradient(to right, transparent 50%, var(--surface2) 100%);
+  }
+
+  .project-card:hover .card-screenshot img {
+    opacity: 1;
+    filter: grayscale(0.1) brightness(0.95);
+  }
+
+  /* Fallback when no screenshot */
+  .card-screenshot-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  /* Content on the right */
+  .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .card-icon {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .card-ext {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity var(--transition);
+    white-space: nowrap;
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
+
+  .project-card:hover .card-ext { opacity: 1; }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    padding-top: 20px;
+  }
+
+  .card-desc {
+    font-size: 0.845rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: auto;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.18rem 0.5rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-family: var(--mono);
+    color: var(--accent);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity var(--transition);
+  }
+
+  .card-link:hover { opacity: 1; }
+
+  /* Accent colours per card */
+  .card-blue  .card-icon { background: rgba(79,142,247,0.12); }
+  .card-purple .card-icon { background: rgba(124,58,237,0.12); }
+  .card-cyan  .card-icon { background: rgba(6,182,212,0.12); }
+  .card-green .card-icon { background: rgba(16,185,129,0.12); }
+  .card-orange .card-icon { background: rgba(249,115,22,0.12); }
+  .card-pink  .card-icon { background: rgba(236,72,153,0.12); }
+  .card-teal  .card-icon { background: rgba(20,184,166,0.12); }
+  .card-indigo .card-icon { background: rgba(99,102,241,0.12); }
+
+  .card-blue   { --card-accent: rgba(79,142,247,0.07); }
+  .card-purple { --card-accent: rgba(124,58,237,0.07); }
+  .card-cyan   { --card-accent: rgba(6,182,212,0.07); }
+  .card-green  { --card-accent: rgba(16,185,129,0.07); }
+  .card-orange { --card-accent: rgba(249,115,22,0.07); }
+  .card-pink   { --card-accent: rgba(236,72,153,0.07); }
+  .card-teal   { --card-accent: rgba(20,184,166,0.07); }
+  .card-indigo { --card-accent: rgba(99,102,241,0.07); }
+
+  /* ─── About / Skills ─────────────────────────────────────── */
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.65rem;
+    margin-top: 2.25rem;
+  }
+
+  .about-copy {
+    max-width: 720px;
+    margin-bottom: 2.5rem;
+  }
+
+  .about-copy .section-lead {
+    max-width: none;
+    margin-bottom: 1.25rem;
+  }
+
+  .about-text {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 0;
+  }
+
+  .about-text strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .about-copy .about-text + .about-text {
+    margin-top: 1.1rem;
+  }
+
+  .about-kicker {
+    font-size: 0.98rem;
+    color: var(--text-dim);
+    font-style: italic;
+    line-height: 1.65;
+    margin: 1.35rem 0;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(79, 142, 247, 0.45);
+  }
+
+  .about-env {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem 1rem;
+    margin-top: 1.75rem;
+  }
+
+  .about-env-label {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .about-env-label::after {
+    content: '·';
+    margin-left: 0.65rem;
+    opacity: 0.45;
+  }
+
+  .about-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.4rem 0.95rem;
+    font-size: 0.78rem;
+    font-family: var(--mono);
+    letter-spacing: 0.03em;
+    --skill: #94a3b8;
+    background: color-mix(in srgb, var(--skill) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--skill) 32%, transparent);
+    color: var(--skill);
+    transition: border-color var(--transition), background 0.2s ease;
+  }
+
+  .about-badge:hover {
+    border-color: color-mix(in srgb, var(--skill) 52%, white);
+  }
+
+  .about-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--skill);
+  }
+
+  .about-badge--distro {
+    --skill: #fb923c;
+  }
+
+  .about-badge--distro .about-badge-dot {
+    background: linear-gradient(135deg, #1793d1 0%, #22d3ee 55%, #34d399 100%);
+  }
+
+  /* ─── Contact ────────────────────────────────────────────── */
+  #contact {
+    border-top: 1px solid var(--border);
+  }
+
+  .contact-box {
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+
+  .contact-title {
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+
+  .contact-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  .contact-email {
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--accent);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(79,142,247,0.25);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    transition: border-color var(--transition), background var(--transition);
+    width: fit-content;
+  }
+
+  .contact-email:hover {
+    border-color: rgba(79,142,247,0.6);
+    background: rgba(79,142,247,0.06);
+  }
+
+  /* ─── Privacy ────────────────────────────────────────────── */
+  #privacy {
+    border-top: 1px solid var(--border);
+    background: rgba(13, 15, 26, 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  #privacy section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+
+  .privacy-content {
+    max-width: 680px;
+  }
+
+  .privacy-content h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .privacy-content p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-content strong {
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .privacy-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    color: var(--green);
+    font-family: var(--mono);
+    margin-bottom: 2rem;
+  }
+
+  /* ─── Footer ─────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+
+  footer a:hover { color: var(--text); }
+
+  /* ─── Divider ────────────────────────────────────────────── */
+  .full-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ─── Responsive ─────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { gap: 1.2rem; }
+    .nav-links li:nth-child(2), .nav-links li:nth-child(3) { display: none; }
+    section { padding: 5rem 1.25rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card { grid-template-columns: 1fr; min-height: unset; }
+    .card-screenshot, .card-screenshot-empty { border-radius: var(--radius-lg) var(--radius-lg) 0 0; height: 160px; }
+    .card-screenshot img { object-position: top; }
+    .contact-box { padding: 2rem 1.5rem; }
+  }
+
+  /* ─── Fade-in animation ──────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fadeup {
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .fadeup:nth-child(1) { animation-delay: 0.1s; }
+  .fadeup:nth-child(2) { animation-delay: 0.2s; }
+  .fadeup:nth-child(3) { animation-delay: 0.3s; }
+  .fadeup:nth-child(4) { animation-delay: 0.4s; }
+  .fadeup:nth-child(5) { animation-delay: 0.5s; }
+  .fadeup:nth-child(6) { animation-delay: 0.6s; }
+  .fadeup:nth-child(7) { animation-delay: 0.7s; }
+  .fadeup:nth-child(8) { animation-delay: 0.8s; }
+
+  .hero-content > * {
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+  }
+  .hero-content > *:nth-child(1) { animation-delay: 0.2s; }
+  .hero-content > *:nth-child(2) { animation-delay: 0.4s; }
+  .hero-content > *:nth-child(3) { animation-delay: 0.6s; }
+</style>
+</head>
+<body>
+
+<!-- ─── Navigation ──────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="#hero">xapient.solutions</a>
+  <ul class="nav-links">
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+  </ul>
+</nav>
+
+<!-- ─── Hero ────────────────────────────────────────────── -->
+<div id="hero">
+  <div class="hero-content">
+    <p class="hero-tag">Teaching · Computer Science · Open Source · Automation</p>
+    <h1 class="hero-name">Thomas Michael Weissel</h1>
+    <p class="hero-sub">Building open source tools for Linux desktops, educational institutions, and home automation — simple, powerful, privacy-first.</p>
+  </div>
+  <div class="hero-scroll">
+    <span>scroll</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ─── Projects ─────────────────────────────────────────── -->
+<hr class="full-divider">
+<section id="projects">
+  <p class="section-label">Work</p>
+  <h2 class="section-title">Open Source Projects</h2>
+  <p class="section-lead">Desktop applications, admin utilities, and integrations<br>— all free, open source, and built for real workflows.</p>
+
+  <div class="projects-grid">
+
+    <!-- LiFE Parental Control -->
+    <a class="project-card card-blue fadeup" href="https://github.com/valueerrorx/LiFE-Parental-Control" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://raw.githubusercontent.com/valueerrorx/LiFE-Parental-Control/main/images/dashboard.png" alt="LiFE Parental Control Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon"><img src="./assets/pc.svg" style="width:22px;height:22px;"></div>
+        <div class="card-title">LiFE Parental Control</div>
+        <div class="card-desc">Parental control for Linux desktops. Screen time limits, DNS web filtering, AppArmor application locks, and KDE kiosk mode — all managed from a modern Vue dashboard.</div>
+        <div class="card-tags">
+          <span class="tag">Vue 3</span>
+          <span class="tag">Electron</span>
+          <span class="tag">AppArmor</span>
+          <span class="tag">systemd</span>
+          <span class="tag">KDE/GNOME</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- next-exam -->
+    <a class="project-card card-purple fadeup" href="https://github.com/Bildungsportal/next-exam" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://raw.githubusercontent.com/Bildungsportal/next-exam/main/info/documentation/img/hb_teacher_dashboard.png" alt="next-exam Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon"><img src="./assets/icon-student-checkbox.svg" style="width:22px;height:22px;"></div>
+        <div class="card-title">next-exam</div>
+        <div class="card-desc">Digital exam environment for schools. Run tests, in-class assignments, and finals securely — with a teacher dashboard and a locked-down student mode.</div>
+        <div class="card-tags">
+          <span class="tag">Vue</span>
+          <span class="tag">Electron</span>
+          <span class="tag">Express</span>
+          <span class="tag">Education</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- Microsoft365-Users -->
+    <a class="project-card card-cyan fadeup" href="https://github.com/valueerrorx/Microsoft365-Users" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://raw.githubusercontent.com/valueerrorx/Microsoft365-Users/main/ui.png" alt="Microsoft 365 Users Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon">👥</div>
+        <div class="card-title">Microsoft 365 Users</div>
+        <div class="card-desc">Desktop app for school admins: bulk-create Microsoft 365 accounts via CSV import, assign licenses automatically, reset passwords — no manual portal clicking required.</div>
+        <div class="card-tags">
+          <span class="tag">Electron</span>
+          <span class="tag">Vue.js</span>
+          <span class="tag">PowerShell</span>
+          <span class="tag">Graph API</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- life-onedrive-sync -->
+    <a class="project-card card-green fadeup" href="https://github.com/valueerrorx/life-onedrive-sync" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://raw.githubusercontent.com/valueerrorx/life-onedrive-sync/main/ui.png" alt="LiFE OneDrive Sync Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon">☁️</div>
+        <div class="card-title">LiFE OneDrive Sync</div>
+        <div class="card-desc">Simplifies OneDrive authentication on Linux. Automates the browser OAuth flow and hooks into the abraunegg onedrive CLI — no command-line gymnastics needed.</div>
+        <div class="card-tags">
+          <span class="tag">Electron</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">OAuth</span>
+          <span class="tag">Linux</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- life-nextcloud-sync -->
+    <a class="project-card card-teal fadeup" href="https://github.com/valueerrorx/life-nextcloud-sync" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://raw.githubusercontent.com/valueerrorx/life-nextcloud-sync/main/ui.png" alt="LiFE Nextcloud Sync Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon"><img src="./assets/icon.svg" style="width:22px;height:22px;"></div>
+        <div class="card-title">LiFE Nextcloud Sync</div>
+        <div class="card-desc">Lean Nextcloud sync client for Linux. Syncs local folders every five minutes over WebDAV — minimal footprint, none of the bloat of the official client.</div>
+        <div class="card-tags">
+          <span class="tag">Electron</span>
+          <span class="tag">WebDAV</span>
+          <span class="tag">Linux</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- life-nextcloudusers -->
+    <a class="project-card card-indigo fadeup" href="https://github.com/valueerrorx/life-nextcloudusers" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="./assets/nextcloudusers2.png" alt="LiFE Nextcloud Users Screenshot" loading="lazy" style="object-position: center; transform: scale(1.25); transform-origin: center;">
+      </div>
+      <div class="card-body">
+        <div class="card-icon"><img src="./assets/icon.svg" style="width:22px;height:22px;"></div>
+        <div class="card-title">LiFE Nextcloud Users</div>
+        <div class="card-desc">Bulk-import Nextcloud and ownCloud users from CSV files. Special characters are sanitized automatically — ideal for schools provisioning entire classes at once.</div>
+        <div class="card-tags">
+          <span class="tag">Python 3</span>
+          <span class="tag">PyQt5</span>
+          <span class="tag">Nextcloud</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- geogebra-standalone -->
+    <a class="project-card card-orange fadeup" href="https://github.com/valueerrorx/geogebra-standalone" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="./assets/geozebra.png" alt="GeoGebra Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon">📐</div>
+        <div class="card-title">GeoGebra Standalone</div>
+        <div class="card-desc">GeoGebra natively on Linux — packaged as AppImage and Debian package. Fully functional offline, no browser required. Great for classrooms with restricted internet access.</div>
+        <div class="card-tags">
+          <span class="tag">Electron</span>
+          <span class="tag">AppImage</span>
+          <span class="tag">Debian</span>
+          <span class="tag">GeoGebra</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- Klartext -->
+    <a class="project-card card-green fadeup" href="https://github.com/valueerrorx/Klartext" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://raw.githubusercontent.com/valueerrorx/Klartext/main/img/klartext.png" alt="Klartext Screenshot" loading="lazy" style="object-position: top right;">
+      </div>
+      <div class="card-body">
+        <div class="card-icon"><img src="./assets/icon.png" style="width:22px;height:22px;object-fit:contain;"></div>
+        <div class="card-title">Klartext</div>
+        <div class="card-desc">Local AI spell-check server — fully offline, no cloud. LanguageTool-compatible API, GPU acceleration via Vulkan, multi-language support. Built for schools and privacy-conscious teams.</div>
+        <div class="card-tags">
+          <span class="tag">Node.js</span>
+          <span class="tag">llama.cpp</span>
+          <span class="tag">Electron</span>
+          <span class="tag">Vue</span>
+          <span class="tag">Vulkan</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- drexel-weiss-node-red-flow -->
+    <a class="project-card card-pink fadeup" href="https://github.com/valueerrorx/drexel-weiss-node-red-flow" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="https://gitlab.com/valueerror/drexel-weiss-node-red-flow/-/raw/main/x2-dashboard.png" alt="Drexel Weiss Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon">🌡️</div>
+        <div class="card-title">Drexel &amp; Weiss Node-Red Flow</div>
+        <div class="card-desc">Integrates Drexel &amp; Weiss x²-plus heat pumps with Home Assistant. Reads USB serial data, converts sensor values, and auto-creates MQTT entities — runs on a Raspberry Pi Zero.</div>
+        <div class="card-tags">
+          <span class="tag">Node-Red</span>
+          <span class="tag">MQTT</span>
+          <span class="tag">HomeAssistant</span>
+          <span class="tag">Raspberry Pi</span>
+        </div>
+        <span class="card-ext">GitHub ↗</span>
+      </div>
+    </a>
+
+    <!-- LiFE -->
+    <a class="project-card card-blue fadeup" href="https://life-edu.eu/" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="./assets/life.png" alt="LiFE Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon"><img src="./assets/ring.png" style="width:22px;height:22px;object-fit:contain;"></div>
+        <div class="card-title">LiFE — Living For Education</div>
+        <div class="card-desc">Open-source IT platform for Austrian secondary schools. Unified secure environment for classroom and home use, BYOD-ready, minimal IT overhead — the umbrella project behind most of the tools on this page.</div>
+        <div class="card-tags">
+          <span class="tag">Education</span>
+          <span class="tag">Linux</span>
+          <span class="tag">BYOD</span>
+          <span class="tag">Open Source</span>
+        </div>
+        <span class="card-ext">life-edu.eu ↗</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ─── About ─────────────────────────────────────────────── -->
+<hr class="full-divider">
+<section id="about">
+  <p class="section-label">Background</p>
+  <h2 class="section-title">About</h2>
+  <div class="about-copy">
+    <p class="section-lead">I'm a CS teacher based in Austria. I build open-source education technology, automation tooling, and Linux desktop apps.</p>
+    <p class="about-kicker">If I'm not teaching, I'm probably automating something that didn't strictly need it.</p>
+    <p class="about-text">I'm a father of three. I wingfoil, snowboard, and I'll try just about any other sport that involves a board. I practice yoga, and I play guitar or piano when I need to clear my head.</p>
+    <p class="about-text">I'm convinced knowledge and software <strong>have to be free</strong>. I work from the idea that <strong>nothing is impossible</strong> — in the classroom and in code. <strong>Open Source First</strong> is how I put that into practice: everything I publish is free, and it will stay that way.</p>
+  </div>
+
+  <div class="skills-grid">
+    <span class="about-badge" style="--skill:#4f8ef7"><span class="about-badge-dot" aria-hidden="true"></span>Linux Desktop Apps</span>
+    <span class="about-badge" style="--skill:#3daee9"><span class="about-badge-dot" aria-hidden="true"></span>Plasmashell/KDE</span>
+    <span class="about-badge" style="--skill:#7c3aed"><span class="about-badge-dot" aria-hidden="true"></span>Vue.js / Electron</span>
+    <span class="about-badge" style="--skill:#06b6d4"><span class="about-badge-dot" aria-hidden="true"></span>Node.js / Python</span>
+    <span class="about-badge" style="--skill:#10b981"><span class="about-badge-dot" aria-hidden="true"></span>Education Technology</span>
+    <span class="about-badge" style="--skill:#f97316"><span class="about-badge-dot" aria-hidden="true"></span>Home Automation</span>
+    <span class="about-badge" style="--skill:#ec4899"><span class="about-badge-dot" aria-hidden="true"></span>System Administration</span>
+    <span class="about-badge" style="--skill:#14b8a6"><span class="about-badge-dot" aria-hidden="true"></span>Cloud Sync &amp; OAuth</span>
+    <span class="about-badge" style="--skill:#6366f1"><span class="about-badge-dot" aria-hidden="true"></span>Open Source First</span>
+    <span class="about-badge about-badge--distro"><span class="about-badge-dot" aria-hidden="true"></span>Arch / Garuda</span>
+  </div>
+</section>
+
+<!-- ─── Contact ───────────────────────────────────────────── -->
+<hr class="full-divider">
+<section id="contact">
+  <p class="section-label">Get in Touch</p>
+  <h2 class="section-title">Contact</h2>
+
+  <div class="contact-box">
+    <div class="contact-title">Mag. Thomas Michael Weissel</div>
+    <p class="contact-desc">Questions about a project? Feature request? Collaboration idea? Drop me a line — I'm happy to hear from humans.</p>
+    <!-- Email obfuscated: valueerror [at] gmail [dot] com -->
+    <a class="contact-email" href="#" onclick="this.href='mai'+'lto:'+'valueerror'+'@'+'gmail'+'.com'; return true;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+      </svg>
+      valueerror [at] gmail [dot] com
+    </a>
+    <p style="font-size:0.78rem; color:var(--text-muted); font-family:var(--mono); margin-top:0.5rem; display:flex; gap:1.5rem; flex-wrap:wrap;">
+      <span>GitHub: <a href="https://github.com/valueerrorx" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">github.com/valueerrorx</a></span>
+      <span>LinkedIn: <a href="https://www.linkedin.com/in/thomas-weissel-619744371/" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none;">thomas-weissel</a></span>
+    </p>
+  </div>
+</section>
+
+<!-- ─── Privacy ───────────────────────────────────────────── -->
+<div id="privacy">
+  <section>
+    <p class="section-label">Privacy</p>
+    <h2 class="section-title">Privacy Policy</h2>
+
+    <div class="privacy-content">
+      <div class="privacy-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        100% tracking-free · No cookies · Open Source
+      </div>
+
+      <p>This website is a static HTML page. It does not use cookies, analytics, tracking pixels, or any form of third-party surveillance. What you see is what you get.</p>
+
+      <h3>Data Collection</h3>
+      <p><strong>None.</strong> This site does not collect, store, or transmit any personal data. There is no server-side logging beyond what your web host may record in standard access logs (IP address, timestamp, requested URL) — this is standard HTTP infrastructure behaviour, not analytics.</p>
+
+      <h3>Cookies</h3>
+      <p>Zero cookies. No consent banner needed — because there is nothing to consent to. Your browser state is your own business.</p>
+
+      <h3>Third-Party Services</h3>
+      <p>None loaded from outside this site: no third-party assets, CDNs, or trackers./p>
+      <p>All project links go to <strong>GitHub</strong>, which has its own privacy policy. No affiliate links or tracking IDs.</p>
+
+      <h3>Open Source</h3>
+      <p>All software published on this portfolio is open source. You can read every line of code. <strong>No telemetry, no phone-home, no licence enforcement.</strong> Free as in freedom.</p>
+
+      <h3>Contact Data</h3>
+      <p>If you contact me via email, I will use your email address only to reply to you. I won't subscribe you to anything, share your address, or store it beyond the conversation.</p>
+
+      <h3>Responsible</h3>
+      <p>Mag. Thomas Michael Weissel<br>Austria<br>valueerror [at] gmail [dot] com</p>
+
+      <p style="margin-top:2rem; font-size:0.8rem; color: var(--text-muted);">Last updated: April 2026. This policy will never get longer — only shorter.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ─── Footer ────────────────────────────────────────────── -->
+<footer>
+  <span>© 2026 Mag. Thomas Michael Weissel · xapient.solutions</span>
+  <span>
+    <a href="https://github.com/valueerrorx" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;·&nbsp;
+    <a href="#privacy">Privacy</a>
+  </span>
+</footer>
+
+<!-- ─── Phaser Physics Overlay (transparent, on top) ────── -->
+<div id="phaser-overlay"></div>
+
+<script>
+// ─── Phaser canvas setup ──────────────────────────────────
+let width  = window.innerWidth;
+let height = window.innerHeight;
+let counter = 0;
+let isMobile = navigator.userAgentData ? navigator.userAgentData.mobile : /Mobi|Android/i.test(navigator.userAgent);
+let number = isMobile ? 10 : 36;
+let gravity = false;
+let graphics;
+let firebirds = [];
+let mouseX = 0, mouseY = 0;
+
+// Matter.js refs (set after scene creates)
+let MatterEngine, MatterBodies, MatterQuery, MatterConstraint, MatterEvents;
+let matterEngine;
+let dragConstraint = null;
+let dragBody = null;
+let phaserScene = null;
+
+const phaserConfig = {
+  type: Phaser.AUTO,
+  width:  width,
+  height: height,
+  transparent: true,
+  parent: 'phaser-overlay',
+  input: { mouse: { preventDefaultWheel: false } },
+  physics: {
+    default: 'matter',
+    matter: {
+      enableSleeping: false,
+      gravity: { y: 0 },
+      debug: false,
+    }
+  }
+};
+
+class Level {
+  preload() {
+    this.load.image('iota', './assets/tangleswap.png');
+  }
+
+  create() {
+    phaserScene = this;
+    this.input.mouse.disableContextMenu();
+    this.input.addPointer(3);
+    this.matter.world.setBounds(0, 0, phaserConfig.width, phaserConfig.height, 64, true, true, true, true);
+    graphics = this.add.graphics();
+
+    // Grab Matter.js internals
+    MatterEngine    = Phaser.Physics.Matter.Matter.Engine;
+    MatterBodies    = Phaser.Physics.Matter.Matter.Bodies;
+    MatterQuery     = Phaser.Physics.Matter.Matter.Query;
+    MatterConstraint= Phaser.Physics.Matter.Matter.Constraint;
+    MatterEvents    = Phaser.Physics.Matter.Matter.Events;
+    matterEngine    = this.matter.world.engine;
+
+    for (let i = 0; i < number; i++) { pumpIt(this, true); }
+    setupDrag(this);
+  }
+
+  update() {
+    if (dragConstraint) {
+      dragConstraint.pointA = { x: mouseX, y: mouseY };
+    }
+    graphics.clear();
+    firebirds.forEach(iota => { checkDistance(iota, firebirds, this); });
+    this.matter.world.setGravity(0, gravity ? 1 : 0);
+  }
+}
+
+function setupDrag(scene) {
+  const canvas = scene.sys.game.canvas;
+
+  // Canvas is pointer-events:none by default — only capture when over a body
+  canvas.style.pointerEvents = 'none';
+
+  // Track mouse globally (works even when canvas has pointer-events:none)
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if (dragConstraint) {
+      dragConstraint.pointA = { x: mouseX, y: mouseY };
+    }
+
+    // Check if mouse is over any physics body → show grab cursor + enable canvas hit
+    const bodies = matterEngine.world.bodies;
+    const hits = MatterQuery.point(bodies, { x: mouseX, y: mouseY });
+    if (hits.length > 0) {
+      canvas.style.pointerEvents = 'auto';
+      canvas.style.cursor = dragBody ? 'grabbing' : 'grab';
+    } else if (!dragBody) {
+      canvas.style.pointerEvents = 'none';
+      canvas.style.cursor = 'default';
+    }
+  });
+
+  window.addEventListener('mousedown', e => {
+    // Middle click → spawn new object at cursor (clientX/Y always correct for fixed canvas)
+    if (e.button === 1) {
+      e.preventDefault();
+      pumpIt(scene, false);
+      return;
+    }
+    if (e.button !== 0) return;
+    const bodies = matterEngine.world.bodies;
+    const hits = MatterQuery.point(bodies, { x: mouseX, y: mouseY });
+    if (hits.length > 0) {
+      dragBody = hits[0];
+      dragConstraint = MatterConstraint.create({
+        pointA: { x: mouseX, y: mouseY },
+        bodyB: dragBody,
+        pointB: { x: 0, y: 0 },
+        length: 0,
+        stiffness: 0.2,
+        damping: 0,
+      });
+      scene.matter.world.add(dragConstraint);
+      canvas.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+  });
+
+  window.addEventListener('mouseup', e => {
+    if (dragConstraint) {
+      scene.matter.world.remove(dragConstraint);
+      dragConstraint = null;
+      dragBody = null;
+      canvas.style.cursor = 'default';
+      canvas.style.pointerEvents = 'none';
+    }
+  });
+
+  window.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    gravity = !gravity;
+  });
+}
+
+function checkDistance(myself, iotas, scene) {
+  iotas.forEach(iota => {
+    let dx = iota.x - myself.x;
+    let dy = iota.y - myself.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist === 0) return;
+    let alpha = dist < 50 ? 0.02 : 3 / dist;
+    graphics.lineStyle(60 / dist, 0x4f8ef7, alpha);
+
+    if (dist < 250) {
+      let springexists = false;
+      myself.springs.forEach(spring => {
+        if (spring.bodyA == iota.body || spring.bodyB == iota.body) { springexists = true; }
+      });
+      if (!springexists) {
+        let spring = Phaser.Physics.Matter.Matter.Constraint.create({
+          bodyA: iota.body,
+          bodyB: myself.body,
+          length: 25,
+          stiffness: 0.00002,
+        });
+        scene.matter.world.add(spring);
+        myself.springs.push(spring);
+      }
+      graphics.beginPath();
+      graphics.moveTo(myself.x, myself.y);
+      graphics.lineTo(iota.x, iota.y);
+      graphics.closePath();
+      graphics.strokePath();
+    } else {
+      myself.springs.forEach(spring => {
+        if (spring.bodyA == iota.body || spring.bodyB == iota.body) {
+          scene.matter.world.remove(spring);
+          myself.springs = myself.springs.filter(item => item !== spring);
+        }
+      });
+    }
+  });
+}
+
+function pumpIt(scene, init) {
+  // ~2% chance of a large floater, otherwise normal size
+  const isLarge = Math.random() < 0.02;
+  let random = isLarge
+    ? Phaser.Math.FloatBetween(0.55, 0.75)
+    : Phaser.Math.FloatBetween(0.1, 0.4);
+
+  let firebird;
+  if (init) {
+    firebird = scene.matter.add.image(
+      Phaser.Math.Between(40, width - 40),
+      Phaser.Math.Between(40, height - 40), 'iota'
+    );
+  } else {
+    firebird = scene.matter.add.image(mouseX, mouseY, 'iota');
+  }
+  firebird.setScale(random);
+  firebird.setAlpha(isLarge ? 0.12 : 0.18);
+  firebird.setCircle(random * 80);
+  // Low friction + very low air resistance = glides much longer
+  firebird.setFriction(0, 0.0002, 0.5);
+  // Slower initial velocity so they drift rather than rush
+  let speed = isLarge ? 0.8 : 1.5;
+  firebird.setVelocityY((Math.random() - 0.5) * speed);
+  firebird.setVelocityX((Math.random() - 0.5) * speed);
+  firebird.setBounce(0.99);
+  firebird.springs = [];
+  firebirds.push(firebird);
+}
+
+let game = new Phaser.Game(phaserConfig);
+game.scene.add('level', Level);
+game.scene.start('level');
+</script>
+
+</body>
+</html>
