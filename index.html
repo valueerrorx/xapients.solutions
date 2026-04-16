@@ -140,11 +140,21 @@
     font-weight: 300;
     letter-spacing: -0.03em;
     line-height: 1.05;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
     background: linear-gradient(135deg, #ffffff 30%, rgba(79,142,247,0.8) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Person line under main hero title */
+  .hero-person {
+    font-size: clamp(1.2rem, 3vw, 1.85rem);
+    font-weight: 400;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+    margin: 0 0 1.35rem;
+    line-height: 1.3;
   }
 
   .hero-sub {
@@ -478,6 +488,32 @@
   .card-indigo { --card-accent: rgba(99,102,241,0.07); }
 
   /* ─── About / Skills ─────────────────────────────────────── */
+  .about-copy {
+    max-width: min(800px, 100%);
+    margin-bottom: 2.5rem;
+    text-align: left;
+  }
+
+  .about-copy > .section-title {
+    margin-bottom: 0.65rem;
+  }
+
+  .about-copy > .about-portrait {
+    width: 132px;
+    max-width: 132px;
+    margin: 0 0 1.15rem 10px;
+    transform: rotate(-4.5deg);
+  }
+
+  @media (max-width: 640px) {
+    .about-copy > .about-portrait {
+      width: 123px;
+      max-width: 123px;
+      margin-left: 25px;
+      transform: rotate(-3.5deg);
+    }
+  }
+
   .skills-grid {
     display: flex;
     flex-wrap: wrap;
@@ -485,9 +521,52 @@
     margin-top: 2.25rem;
   }
 
-  .about-copy {
-    max-width: 800px;
-    margin-bottom: 2.5rem;
+  .about-portrait {
+    position: relative;
+    width: 100%;
+    max-width: 132px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+    background: rgba(17, 24, 39, 0.35);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 8px 22px rgba(0,0,0,0.35),
+      0 0 0 1px rgba(255,255,255,0.03) inset;
+  }
+
+  .about-portrait::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 90% at 30% 10%, rgba(79,142,247,0.35) 0%, transparent 55%),
+      radial-gradient(90% 70% at 90% 85%, rgba(124,58,237,0.25) 0%, transparent 55%);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.65;
+  }
+
+  .about-portrait > img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: saturate(1.02) contrast(1.02);
+    opacity: 0.55;
+  }
+
+  .about-portrait figcaption {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 0.45rem 0.45rem 0.5rem;
+    line-height: 1.25;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.18);
   }
 
   .about-copy .section-lead {
@@ -757,8 +836,9 @@
     animation: fadeUp 0.8s ease forwards;
   }
   .hero-content > *:nth-child(1) { animation-delay: 0.2s; }
-  .hero-content > *:nth-child(2) { animation-delay: 0.4s; }
-  .hero-content > *:nth-child(3) { animation-delay: 0.6s; }
+  .hero-content > *:nth-child(2) { animation-delay: 0.35s; }
+  .hero-content > *:nth-child(3) { animation-delay: 0.5s; }
+  .hero-content > *:nth-child(4) { animation-delay: 0.65s; }
 </style>
 </head>
 <body>
@@ -779,7 +859,8 @@
 <div id="hero">
   <div class="hero-content">
     <p class="hero-tag">Teaching · Computer Science · Open Source · Automation</p>
-    <h1 class="hero-name">Thomas Michael Weissel</h1>
+    <h1 class="hero-name">xapient solutions</h1>
+    <p class="hero-person">Thomas Michael Weissel</p>
     <p class="hero-sub">Building open source tools for Linux desktops, educational institutions, and home automation — simple, powerful, privacy-first.</p>
   </div>
   <div class="hero-scroll">
@@ -826,7 +907,7 @@
       </div>
       <div class="card-body">
         <div class="card-icon"><img src="./assets/icon-student-checkbox.svg" style="width:22px;height:22px;"></div>
-        <div class="card-title">next-exam</div>
+        <div class="card-title">Next-Exam</div>
         <div class="card-desc">Digital exam environment for schools. Run tests, in-class assignments, and finals securely — with a teacher dashboard and a locked-down student mode.</div>
         <div class="card-tags">
           <span class="tag">Vue</span>
@@ -989,6 +1070,25 @@
       </div>
     </a>
 
+    <!-- linux-bildung.at -->
+    <a class="project-card card-teal fadeup" href="https://linux-bildung.at/" target="_blank" rel="noopener">
+      <div class="card-screenshot">
+        <img src="./assets/osos.png" alt="linux-bildung.at Screenshot" loading="lazy">
+      </div>
+      <div class="card-body">
+        <div class="card-icon">📰</div>
+        <div class="card-title">linux-bildung.at</div>
+        <div class="card-desc">Community blog about free open-source software in schools: tooling, how-tos, deployments, and digital sovereignty — from real classroom practice in Austria.</div>
+        <div class="card-tags">
+          <span class="tag">FOSS</span>
+          <span class="tag">Education</span>
+          <span class="tag">Linux</span>
+          <span class="tag">Blog</span>
+        </div>
+        <span class="card-ext">linux-bildung.at ↗</span>
+      </div>
+    </a>
+
     <!-- Cows on Ice -->
     <a class="project-card card-cyan fadeup" href="https://xapient.solutions/games/cowsonice/" target="_blank" rel="noopener">
       <div class="card-screenshot">
@@ -1015,10 +1115,19 @@
 <hr class="full-divider">
 <section id="about">
   <p class="section-label">Background</p>
-  <h2 class="section-title">About</h2>
   <div class="about-copy">
+    <h2 class="section-title">About</h2>
+
     <p class="section-lead">I'm a CS teacher based in Austria. <br>I build open-source education technology, automation tooling, and Linux desktop apps.</p>
+    
+    <figure class="about-portrait">
+      <img src="./assets/mesmall.png" alt="Portrait of Thomas Michael Weissel" loading="lazy" decoding="async">
+      <figcaption>valueerror</figcaption>
+    </figure>
+    
     <p class="about-kicker">If I'm not teaching, I'm probably automating something that didn't strictly need it.</p>
+    
+
     <p class="about-text">I'm a father of three. I wingfoil, snowboard, and I'll try just about any other sport that involves a board. I practice yoga, and I play guitar or piano when I need to clear my head.</p>
     <p class="about-text">I'm convinced knowledge and software have to be free and that your data has to be protected. <br>
     I also work from the idea that <strong>nothing is impossible</strong> — in the classroom and in code. </p>
@@ -1084,15 +1193,10 @@
       <p>Zero cookies. No consent banner needed — because there is nothing to consent to. Your browser state is your own business.</p>
 
       <h3>Third-Party Services</h3>
-      <p>None loaded from outside this site: no third-party assets, CDNs, or trackers./p>
-      <p>All project links go to <strong>GitHub</strong>, which has its own privacy policy. No affiliate links or tracking IDs.</p>
+      <p>None loaded from outside this site: no third-party assets, CDNs, or trackers. <br>
+      All project links go to <strong>GitHub</strong>, which has its own privacy policy. No affiliate links or tracking IDs.</p>
 
-      <h3>Open Source</h3>
-      <p>All software published on this portfolio is open source. You can read every line of code. <strong>No telemetry, no phone-home, no licence enforcement.</strong> Free as in freedom.</p>
-
-      <h3>Contact Data</h3>
-      <p>If you contact me via email, I will use your email address only to reply to you. I won't subscribe you to anything, share your address, or store it beyond the conversation.</p>
-
+ 
       <h3>Responsible</h3>
       <p>Mag. Thomas Michael Weissel<br>Austria<br>valueerror [at] gmail [dot] com</p>
 
