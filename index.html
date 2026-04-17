@@ -498,20 +498,32 @@
     margin-bottom: 0.65rem;
   }
 
-  .about-copy > .about-portrait {
-    width: 132px;
-    max-width: 132px;
+  /* Paired portraits under About heading */
+  .about-portraits {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-start;
     margin: 0 0 1.15rem 10px;
-    transform: rotate(-4.5deg);
   }
 
+  .about-portraits .about-portrait {
+    width: 132px;
+    max-width: 132px;
+    margin: 0;
+  }
+
+  .about-portrait--tilt-left { transform: rotate(-4.5deg); }
+  .about-portrait--tilt-right { transform: rotate(4.5deg); }
+  .about-portrait--tilt-soft { transform: rotate(1.75deg); }
+
   @media (max-width: 640px) {
-    .about-copy > .about-portrait {
-      width: 123px;
-      max-width: 123px;
-      margin-left: 25px;
-      transform: rotate(-3.5deg);
-    }
+    .about-portraits { margin-left: 25px; }
+    .about-portraits .about-portrait { width: 123px; max-width: 123px; }
+    .about-portrait--tilt-left { transform: rotate(-3.5deg); }
+    .about-portrait--tilt-right { transform: rotate(3.5deg); }
+    .about-portrait--tilt-soft { transform: rotate(1.25deg); }
   }
 
   .skills-grid {
@@ -552,21 +564,8 @@
     width: 100%;
     height: auto;
     display: block;
-    filter: saturate(1.02) contrast(1.02);
-    opacity: 0.55;
-  }
-
-  .about-portrait figcaption {
-    font-family: var(--mono);
-    font-size: 0.58rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    text-align: center;
-    padding: 0.45rem 0.45rem 0.5rem;
-    line-height: 1.25;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    background: rgba(0,0,0,0.18);
+    filter: saturate(1.02) contrast(6) hue-rotate(200deg);
+    opacity: 0.7;
   }
 
   .about-copy .section-lead {
@@ -1120,10 +1119,19 @@
 
     <p class="section-lead">I'm a CS teacher based in Austria. <br>I build open-source education technology, automation tooling, and Linux desktop apps.</p>
     
-    <figure class="about-portrait">
-      <img src="./assets/mesmall.png" alt="Portrait of Thomas Michael Weissel" loading="lazy" decoding="async">
-      <figcaption>valueerror</figcaption>
-    </figure>
+    <div class="about-portraits">
+      <figure class="about-portrait about-portrait--tilt-left">
+        <img src="./assets/mee1.png" alt="Portrait of Thomas Michael Weissel" loading="lazy" decoding="async">
+      </figure>
+
+      <figure class="about-portrait about-portrait--tilt-right">
+        <img src="./assets/mee2.png" alt="Portrait of Thomas Michael Weissel" loading="lazy" decoding="async">
+      </figure>
+
+      <figure class="about-portrait about-portrait--tilt-soft">
+        <img src="./assets/mee3.png" alt="Portrait of Thomas Michael Weissel" loading="lazy" decoding="async">
+      </figure>
+    </div>
     
     <p class="about-kicker">If I'm not teaching, I'm probably automating something that didn't strictly need it.</p>
     
@@ -1447,6 +1455,25 @@ function pumpIt(scene, init, forceLarge = false) {
 let game = new Phaser.Game(phaserConfig);
 game.scene.add('level', Level);
 game.scene.start('level');
+
+// Keep Phaser canvas + physics bounds in sync with viewport.
+const resizePhaser = () => {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  game.scale.resize(width, height);
+  if (phaserScene) {
+    phaserScene.matter.world.setBounds(0, 0, width, height, 64, true, true, true, true);
+  }
+};
+
+let resizeRaf = 0;
+window.addEventListener('resize', () => {
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => {
+    resizeRaf = 0;
+    resizePhaser();
+  });
+});
 </script>
 
 </body>
