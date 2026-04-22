@@ -498,6 +498,59 @@
     margin-bottom: 0.65rem;
   }
 
+  /* About support button (Liberapay) */
+  .about-support {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+
+  .about-support-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: fit-content;
+  }
+
+  .support-button {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid rgba(79,142,247,0.35);
+    background: linear-gradient(135deg, rgba(79,142,247,0.14) 0%, rgba(124,58,237,0.10) 100%);
+    padding: 0.75rem 1.15rem;
+    border-radius: var(--radius);
+    transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    width: fit-content;
+  }
+
+  .support-button:hover {
+    border-color: rgba(79,142,247,0.75);
+    background: linear-gradient(135deg, rgba(79,142,247,0.20) 0%, rgba(124,58,237,0.14) 100%);
+    transform: translateY(-1px);
+  }
+
+  .support-button:focus-visible {
+    outline: 2px solid rgba(79,142,247,0.8);
+    outline-offset: 3px;
+  }
+
+  .support-note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    opacity: 0.9;
+  }
+
   /* Paired portraits under About heading */
   .about-portraits {
     display: flex;
@@ -1146,6 +1199,23 @@
     I also work from the idea that <strong>nothing is impossible</strong> — in the classroom and in code. </p>
     <p class="about-text"><strong>Open Source First</strong> is how I put that into practice: 
       everything I publish is free, and it will stay that way.</p>
+
+    <div class="about-support">
+      <div class="about-support-row">
+        <a class="support-button" href="https://liberapay.com/valueerror/donate" target="_blank" rel="noopener">
+          Buy me a coffee <span aria-hidden="true">↗</span>
+        </a>
+        <span class="support-note">via Liberapay</span>
+      </div>
+
+      <div class="about-support-row">
+        <a class="support-button" href="https://buy.stripe.com/5kQcN60gM8CCbWC5wd2oE00" target="_blank" rel="noopener">
+          Buy me a drink <span aria-hidden="true">↗</span>
+        </a>
+        <span class="support-note">Direct Stripe checkout</span>
+        <span class="support-note">no account needed</span>
+      </div>
+    </div>
   </div>
 
   <div class="skills-grid">
